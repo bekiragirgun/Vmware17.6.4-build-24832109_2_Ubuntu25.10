@@ -4,7 +4,7 @@ VMware Workstation 17.6.4 kernel modules patched for Linux kernel 6.17+ compatib
 
 ## Compatibility
 
-- **VMware Workstation**: 17.6.4
+- **VMware Workstation**: 17.6.4 build-24832109
 - **Kernel**: 6.17.x (tested on 6.17.0-5-generic)
 - **Ubuntu**: 25.10 (Questing Quetzal)
 - **Architecture**: x86_64
@@ -33,7 +33,15 @@ VMware Workstation 17.6.4 kernel modules patched for Linux kernel 6.17+ compatib
 2. **Build System**
    - Added `ccflags-y` to `Makefile.kernel`
 
-## Installation
+## Quick Install
+
+```bash
+git clone https://github.com/bekiragirgun/Vmware17.6.4-build-24832109_2_Ubuntu25.10.git
+cd Vmware17.6.4-build-24832109_2_Ubuntu25.10
+sudo make install
+```
+
+## Manual Installation
 
 ### Prerequisites
 
@@ -45,21 +53,11 @@ sudo apt-get install -y build-essential linux-headers-$(uname -r) git
 ### Build and Install
 
 ```bash
-# Clone repository
-git clone https://github.com/YOUR_USERNAME/vmware-host-modules-kernel-6.17.git
-cd vmware-host-modules-kernel-6.17
-
 # Build modules
-cd vmmon-only && make && cd ..
-cd vmnet-only && make && cd ..
+make
 
 # Install modules
-sudo mkdir -p /lib/modules/$(uname -r)/misc/
-sudo install -m 644 vmmon-only/vmmon.ko /lib/modules/$(uname -r)/misc/
-sudo install -m 644 vmnet-only/vmnet.ko /lib/modules/$(uname -r)/misc/
-
-# Update module dependencies
-sudo depmod -a
+sudo make install
 
 # Load modules
 sudo modprobe vmmon
@@ -69,9 +67,30 @@ sudo modprobe vmnet
 sudo systemctl restart vmware
 ```
 
-## Quick Install Script
+## Rebuild Script
 
-A helper script is provided in `/usr/local/bin/rebuild-vmware-modules.sh` after installation.
+For kernel updates, use the provided script:
+
+```bash
+./rebuild-vmware-modules.sh
+```
+
+Or use the Makefile:
+
+```bash
+sudo make reload
+```
+
+## Available Make Targets
+
+- `make` or `make all` - Build both modules
+- `make vmmon` - Build only vmmon
+- `make vmnet` - Build only vmnet
+- `make clean` - Clean build artifacts
+- `make install` - Build and install modules
+- `make load` - Load modules and restart VMware
+- `make unload` - Unload modules and stop VMware
+- `make reload` - Unload, rebuild, install, and load
 
 ## Known Issues
 
@@ -112,9 +131,41 @@ uname -r
 ls /lib/modules/$(uname -r)/build
 ```
 
+### Build Errors
+
+If you encounter build errors:
+
+1. Ensure you have the correct kernel headers:
+   ```bash
+   sudo apt-get install linux-headers-$(uname -r)
+   ```
+
+2. Clean and rebuild:
+   ```bash
+   make clean
+   make
+   ```
+
+## File Structure
+
+```
+.
+├── vmmon-only/          # VMware monitor module
+│   ├── include/         # Header files
+│   ├── linux/          # Linux-specific code
+│   ├── common/         # Common code
+│   └── bootstrap/      # Bootstrap code
+├── vmnet-only/         # VMware network module
+├── Makefile            # Build system
+├── rebuild-vmware-modules.sh  # Rebuild script
+└── README.md           # This file
+```
+
 ## Credits
 
 Based on VMware Workstation 17.6.4 official modules with patches for modern kernel compatibility.
+
+Patches developed using Claude Code: https://claude.com/claude-code
 
 ## License
 
@@ -123,3 +174,13 @@ These modules are distributed under the same license as VMware's original module
 ## Disclaimer
 
 This is an unofficial patch. Use at your own risk. For production environments, consider using officially supported configurations.
+
+## Contributing
+
+Feel free to open issues or submit pull requests for improvements or fixes.
+
+## Author
+
+Bekir Agirgun (@bekiragirgun)
+
+Generated with assistance from Claude Code
